@@ -15,16 +15,38 @@ const generateRandomNumber = () => Math.floor(Math.random() * anecdotes.length);
 
 const App = () => {
   const [selected, setSelected] = useState(0);
+  const [vote, setVote] = useState({});
   const handleClick = () => {
     const selectedNumber = generateRandomNumber();
     setSelected(selectedNumber);
   };
-  console.log(selected);
+  const handleVotes = () => {
+    const newVote = {
+      ...vote,
+      [selected]: vote[selected] ? vote[selected] + 1 : 1,
+    };
+    setVote(newVote);
+  };
+  console.log(vote);
+
+  const mostVote = Object.keys(vote).reduce(
+    (a, b) => (vote[a] > vote[b] ? a : b),
+    0
+  );
+  console.log(mostVote);
 
   return (
     <div>
-      <h2>{anecdotes[selected]}</h2>
+      <h2>Anecdote of the day</h2>
+
+      <p>{anecdotes[selected]}</p>
+      <button onClick={handleVotes}>votes</button>
       <button onClick={handleClick}>next anecdote</button>
+      <p>has {vote[selected] || 0} votes</p>
+
+      <h2>Anecdote with most votes</h2>
+      <p>{anecdotes[mostVote]}</p>
+      <p>has {vote[mostVote] || 0} votes</p>
     </div>
   );
 };
