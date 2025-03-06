@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 const App = () => {
   const [query, setQuery] = useState("");
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(false);
   console.log(countries);
+
+  const handleShowCountry = (countryName) => {
+    console.log(countryName);
+  };
 
   useEffect(() => {
     async function fetchCountry() {
@@ -44,11 +48,19 @@ const App = () => {
       ) : query && filteredCountry.length >= 10 ? (
         <p>Kurang spesifik</p>
       ) : (
-        <ul>
+        <div>
           {filteredCountry?.map((country) => (
-            <li key={country.name.common}>{country.name.common}</li>
+            <div
+              key={country.name.common}
+              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <p>{country.name.common}</p>
+              <button onClick={() => handleShowCountry(country.name.common)}>
+                show
+              </button>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
