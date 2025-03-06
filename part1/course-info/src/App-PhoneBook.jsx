@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
-import axios from "axios";
+import personService from "./services/phoneBooks";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,17 +11,54 @@ const App = () => {
 
   const handleAddPerson = (e) => {
     e.preventDefault();
-    const isReady = persons.some(
+
+    const existingPerson = persons.find(
       (p) => p.name.toLowerCase() === newName.toLowerCase()
     );
 
-    if (isReady) return alert(`${newName} is already added to phonebook`);
+    if (existingPerson) {
+      const confirmChange = confirm(
+        `${newName} is already added to phonebook, replace old number with a new one?`
+      );
 
-    setPersons((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), name: newName, number: newNumber },
-    ]);
-    setNewName("");
+      if (!confirmChange) return;
+
+      const updatedPerson = { ...existingPerson, number: newNumber };
+
+      personService.update(existingPerson.id, updatedPerson).then((res) => {
+        setPersons((prevPerson) =>
+          prevPerson.map((person) => (person.id === res.id ? res : person))
+        );
+        setNewName("");
+        setNewNumber("");
+      });
+    } else {
+      const newPerson = { name: newName, number: newNumber };
+
+      personService
+        .create(newPerson)
+        .then((person) => {
+          setPersons((prev) => [...prev, person]);
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch((err) => console.log(err));
+    }
+  };
+
+  const handleDeletePerson = async (id) => {
+    const personToDelete = persons.find((p) => p.id === id);
+
+    const confirmToDelete = confirm(`Delete ${personToDelete.name}`);
+
+    if (!confirmToDelete) return;
+
+    try {
+      await personService.remove(id);
+      setPersons((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   const filterPersons = filter
@@ -30,8 +67,12 @@ const App = () => {
 
   useEffect(() => {
     async function GET() {
-      const response = await axios.get("http://localhost:3001/persons");
-      setPersons(response.data);
+      try {
+        const person = await personService.getAll();
+        setPersons(person);
+      } catch (err) {
+        console.log(err);
+      }
     }
     GET();
   }, []);
@@ -49,9 +90,15 @@ const App = () => {
       />
       <h2>Numbers</h2>
       {filterPersons.map((people) => (
-        <p key={people.name}>
-          {people.name} {people.number}
-        </p>
+        <div
+          key={people.id}
+          style={{ display: "flex", alignItems: "center", gap: "10px" }}
+        >
+          <p>
+            {people.name} {people.number}
+          </p>
+          <button onClick={() => handleDeletePerson(people.id)}>delete</button>
+        </div>
       ))}
     </div>
   );
