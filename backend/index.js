@@ -57,7 +57,7 @@ app.post("/api/notes", (request, response) => {
   const body = request.body;
 
   if (!body.content) {
-    return response.status(404).json({ error: "content is missing" });
+    return response.status(404).json({ error: "Content is missing" });
   }
 
   const note = {
