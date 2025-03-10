@@ -9,7 +9,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
 
-  const handleAddPerson = (e) => {
+  const handleAddPerson = async (e) => {
     e.preventDefault();
 
     const existingPerson = persons.find(
@@ -25,13 +25,15 @@ const App = () => {
 
       const updatedPerson = { ...existingPerson, number: newNumber };
 
-      personService.update(existingPerson.id, updatedPerson).then((res) => {
-        setPersons((prevPerson) =>
-          prevPerson.map((person) => (person.id === res.id ? res : person))
-        );
-        setNewName("");
-        setNewNumber("");
-      });
+      await personService
+        .update(existingPerson.id, updatedPerson)
+        .then((res) => {
+          setPersons((prevPerson) =>
+            prevPerson.map((person) => (person.id === res.id ? res : person))
+          );
+          setNewName("");
+          setNewNumber("");
+        });
     } else {
       const newPerson = { name: newName, number: newNumber };
 
