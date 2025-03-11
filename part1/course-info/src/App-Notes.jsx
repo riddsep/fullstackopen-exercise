@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Note from "./components/Note";
 import noteService from "./services/notes";
 import loginService from "./services/login";
+import LoginForm from "./components/LoginForm";
 
 const App = () => {
   const [notes, setNotes] = useState([]);
@@ -10,6 +11,8 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
+  const [loginVisible, setLoginVisible] = useState(false);
+
   console.log(user);
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -82,30 +85,6 @@ const App = () => {
       .catch((err) => console.error(err));
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
-  );
-
   const noteForm = () => (
     <form onSubmit={addNote}>
       <input value={newNote} onChange={(e) => setNewNote(e.target.value)} />
@@ -116,7 +95,18 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-      {!user && loginForm()}
+      {!user && (
+        <button onClick={() => setLoginVisible((prev) => !prev)}>log in</button>
+      )}
+      {!user && loginVisible && (
+        <LoginForm
+          handleSubmit={handleLogin}
+          handleUsernameChange={(e) => setUsername(e.target.value)}
+          handlePasswordChange={(e) => setPassword(e.target.value)}
+          username={username}
+          password={password}
+        />
+      )}
       {user && (
         <div>
           <p>{user.name} logged in</p>
